@@ -14,11 +14,16 @@ contract Homework2 {
     }
 
     function removeIndex(uint256 index) public {
-        if (index >= array.length) {
+        uint256 length = array.length;
+        if (index >= length) {
             revert Homework2__InvalidNumber();
         }
-        for (uint256 i = index; i < array.length - 1; i++) {
-            array[i] = array[i + 1];
+        uint256 i = index;
+        unchecked {
+            while (i < length - 1) {
+                array[i] = array[i + 1];
+                ++i;
+            }
         }
         array.pop();
     }
