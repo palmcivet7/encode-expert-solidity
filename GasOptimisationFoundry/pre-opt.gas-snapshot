@@ -1,0 +1,8 @@
+GasTest:testWhiteTranferAmountUpdate(address,address,uint256,string,uint256) (runs: 256, μ: 364362, ~: 364911)
+GasTest:test_admins() (gas: 36257)
+GasTest:test_onlyOwner(address,uint256) (runs: 256, μ: 27832, ~: 27962)
+GasTest:test_tiers(address,uint256) (runs: 256, μ: 76156, ~: 76269)
+GasTest:test_tiersReverts(address,uint256) (runs: 256, μ: 25692, ~: 25692)
+GasTest:test_whitelistEvents(address,address,uint256,string,uint256) (runs: 256, μ: 355135, ~: 357988)
+GasTest:test_whitelistEvents(address,uint256) (runs: 256, μ: 78225, ~: 78370)
+GasTest:test_whitelistTransfer(address,address,uint256,string,uint256) (runs: 256, μ: 354486, ~: 357979)
