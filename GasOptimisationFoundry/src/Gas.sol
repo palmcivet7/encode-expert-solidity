@@ -19,10 +19,10 @@ contract GasContract {
     uint256 public constant BASIC_FLAG = 0;
     uint256 public constant DIVIDEND_FLAG = 1;
     uint256 public totalSupply = 0; // cannot be updated
-    uint256 public paymentCounter = 0;
-    uint256 public tradePercent = 12;
-    uint256 public tradeMode = 0;
-    uint256 wasLastOdd = 1;
+    uint8 public paymentCounter = 0;
+    uint8 public tradePercent = 12;
+    uint8 public tradeMode = 0;
+    bool public isReady = false;
     mapping(address => uint256) public balances;
     mapping(address => Payment[]) public payments;
     mapping(address => uint256) public whitelist;
@@ -30,7 +30,6 @@ contract GasContract {
     mapping(address => ImportantStruct) public whiteListStruct;
     address[5] public administrators;
     address public contractOwner;
-    bool public isReady = false;
 
     event AddedToWhitelist(address userAddress, uint256 tier);
     event supplyChanged(address indexed, uint256 indexed);
@@ -56,8 +55,8 @@ contract GasContract {
 
     struct ImportantStruct {
         uint256 amount;
-        uint256 valueA; // max 3 digits
         uint256 bigValue;
+        uint256 valueA; // max 3 digits
         uint256 valueB; // max 3 digits
         bool paymentStatus;
         address sender;
@@ -122,8 +121,33 @@ contract GasContract {
         }
     }
 
-    function getPaymentHistory() public payable returns (History[] memory paymentHistory_) {
-        return paymentHistory;
+    function transfer(address _recipient, uint256 _amount, string calldata _name) public returns (bool) {
+        if (balances[msg.sender] < _amount) {
+            revert InsufficientBalance();
+        }
+        if (bytes(_name).length >= 9) {
+            revert NameTooLong();
+        }
+        unchecked {
+            balances[msg.sender] -= _amount;
+            balances[_recipient] += _amount;
+        }
+
+        emit Transfer(_recipient, _amount);
+
+        Payment memory payment = Payment({
+            admin: address(0),
+            adminUpdated: false,
+            paymentType: PaymentType.BasicPayment,
+            recipient: _recipient,
+            amount: _amount,
+            recipientName: _name,
+            paymentID: ++paymentCounter
+        });
+
+        payments[msg.sender].push(payment);
+
+        return true;
     }
 
     function checkForAdmin(address _user) public view returns (bool admin_) {
@@ -168,35 +192,6 @@ contract GasContract {
         return payments[_user];
     }
 
-    function transfer(address _recipient, uint256 _amount, string calldata _name) public returns (bool) {
-        if (balances[msg.sender] < _amount) {
-            revert InsufficientBalance();
-        }
-        if (bytes(_name).length >= 9) {
-            revert NameTooLong();
-        }
-        unchecked {
-            balances[msg.sender] -= _amount;
-            balances[_recipient] += _amount;
-        }
-
-        emit Transfer(_recipient, _amount);
-
-        Payment memory payment = Payment({
-            admin: address(0),
-            adminUpdated: false,
-            paymentType: PaymentType.BasicPayment,
-            recipient: _recipient,
-            amount: _amount,
-            recipientName: _name,
-            paymentID: ++paymentCounter
-        });
-
-        payments[msg.sender].push(payment);
-
-        return true;
-    }
-
     function updatePayment(address _user, uint256 _ID, uint256 _amount, PaymentType _type) public onlyAdminOrOwner {
         if (_ID <= 0) {
             revert InvalidId();
@@ -235,7 +230,7 @@ contract GasContract {
         } else {
             whitelist[_userAddrs] = 0;
         }
-
+        uint8 wasLastOdd = 1;
         wasLastOdd = 1 - wasLastOdd;
         isOddWhitelistUser[_userAddrs] = wasLastOdd;
 
@@ -260,6 +255,10 @@ contract GasContract {
 
     function getPaymentStatus(address sender) public view returns (bool, uint256) {
         return (whiteListStruct[sender].paymentStatus, whiteListStruct[sender].amount);
+    }
+
+    function getPaymentHistory() public payable returns (History[] memory paymentHistory_) {
+        return paymentHistory;
     }
 
     receive() external payable {
