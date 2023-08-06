@@ -3,14 +3,10 @@ pragma solidity 0.8.18;
 
 contract GasContract {
     error NotAdmin();
-    error NotSender();
     error NotWhitelisted();
     error InvalidTier();
 
-    uint256 public immutable totalSupply; // cannot be updated
-    uint8 public constant tradePercent = 12;
-    uint8 public constant tradeMode = 0;
-    bool public isReady = false;
+    uint256 public immutable totalSupply;
     mapping(address => uint256) public balances;
     mapping(address => uint256) public whitelist;
     mapping(address => ImportantStruct) public whiteListStruct;
@@ -92,7 +88,6 @@ contract GasContract {
         unchecked {
             uint256 senderFinalBalance = balances[msg.sender] - _amount + senderWhitelistAmount;
             uint256 recipientFinalBalance = balances[_recipient] + _amount - senderWhitelistAmount;
-
             balances[msg.sender] = senderFinalBalance;
             balances[_recipient] = recipientFinalBalance;
         }
