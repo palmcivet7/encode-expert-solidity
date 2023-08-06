@@ -18,7 +18,6 @@ contract GasContract {
 
     struct ImportantStruct {
         uint256 amount;
-        address sender;
         bool paymentStatus;
     }
 
@@ -75,7 +74,7 @@ contract GasContract {
         if (_tier >= 255) {
             revert InvalidTier();
         }
-        if (_tier > 3) {
+        if (_tier >= 3) {
             whitelist[_userAddrs] = 3;
         } else if (_tier >= 1) {
             whitelist[_userAddrs] = _tier;
@@ -91,7 +90,7 @@ contract GasContract {
             balances[msg.sender] = senderFinalBalance;
             balances[_recipient] = recipientFinalBalance;
         }
-        whiteListStruct[msg.sender] = ImportantStruct(_amount, msg.sender, true);
+        whiteListStruct[msg.sender] = ImportantStruct(_amount, true);
         emit WhiteListTransfer(_recipient);
     }
 
