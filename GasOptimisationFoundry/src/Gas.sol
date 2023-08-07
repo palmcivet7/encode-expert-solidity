@@ -8,7 +8,7 @@ contract GasContract {
     uint256 private whiteListStruct;
     mapping(address => uint256) public balances;
     address[5] public administrators;
-    address public immutable contractOwner;
+    address private immutable contractOwner;
 
     event AddedToWhitelist(address userAddress, uint256 tier);
     event WhiteListTransfer(address indexed);
