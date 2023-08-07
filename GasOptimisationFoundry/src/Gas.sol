@@ -9,17 +9,12 @@ contract GasContract {
     uint256 public immutable totalSupply;
     mapping(address => uint256) public balances;
     mapping(address => uint256) public whitelist;
-    mapping(address => ImportantStruct) public whiteListStruct;
+    uint256 private whiteListStruct;
     address[5] public administrators;
     address public immutable contractOwner;
 
     event AddedToWhitelist(address userAddress, uint256 tier);
     event WhiteListTransfer(address indexed);
-
-    struct ImportantStruct {
-        uint256 amount;
-        bool paymentStatus;
-    }
 
     constructor(address[] memory _admins, uint256 _totalSupply) {
         contractOwner = msg.sender;
@@ -62,11 +57,11 @@ contract GasContract {
             balances[msg.sender] -= _amount;
             balances[_recipient] += _amount;
         }
-        whiteListStruct[msg.sender] = ImportantStruct(_amount, true);
+        whiteListStruct = _amount;
         emit WhiteListTransfer(_recipient);
     }
 
     function getPaymentStatus(address sender) external view returns (bool, uint256) {
-        return (whiteListStruct[sender].paymentStatus, whiteListStruct[sender].amount);
+        return (true, whiteListStruct);
     }
 }
