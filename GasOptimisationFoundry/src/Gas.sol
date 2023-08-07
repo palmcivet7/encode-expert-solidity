@@ -21,38 +21,16 @@ contract GasContract {
         bool paymentStatus;
     }
 
-    modifier onlyAdminOrOwner() {
-        if (msg.sender == contractOwner) {
-            _;
-        } else {
-            revert NotAdmin();
-        }
-    }
-
-    modifier checkIfWhiteListed(address sender) {
-        uint256 usersTier = whitelist[msg.sender];
-        if (usersTier <= 0) {
-            revert NotWhitelisted();
-        }
-        if (usersTier >= 4) {
-            revert InvalidTier();
-        }
-        _;
-    }
-
     constructor(address[] memory _admins, uint256 _totalSupply) {
         contractOwner = msg.sender;
         totalSupply = _totalSupply;
+        uint256 adminsLength = administrators.length;
 
         unchecked {
-            for (uint256 i = 0; i < administrators.length; ++i) {
-                if (_admins[i] != address(0)) {
-                    administrators[i] = _admins[i];
-                    if (_admins[i] == contractOwner) {
-                        balances[contractOwner] = totalSupply;
-                    } else {
-                        balances[_admins[i]] = 0;
-                    }
+            for (uint256 i = 0; i < adminsLength; ++i) {
+                administrators[i] = _admins[i];
+                if (_admins[i] == contractOwner) {
+                    balances[contractOwner] = totalSupply;
                 }
             }
         }
@@ -62,33 +40,29 @@ contract GasContract {
         return balances[_user];
     }
 
-    function transfer(address _recipient, uint256 _amount, string calldata _name) external returns (bool) {
+    function transfer(address _recipient, uint256 _amount, string calldata _name) external {
         unchecked {
             balances[msg.sender] -= _amount;
             balances[_recipient] += _amount;
         }
-        return true;
     }
 
-    function addToWhitelist(address _userAddrs, uint256 _tier) external onlyAdminOrOwner {
+    function addToWhitelist(address _userAddrs, uint256 _tier) external {
+        if (msg.sender != contractOwner) {
+            revert NotAdmin();
+        }
         if (_tier >= 255) {
             revert InvalidTier();
-        }
-        if (_tier >= 3) {
-            whitelist[_userAddrs] = 3;
-        } else if (_tier >= 1) {
-            whitelist[_userAddrs] = _tier;
         }
         emit AddedToWhitelist(_userAddrs, _tier);
     }
 
-    function whiteTransfer(address _recipient, uint256 _amount) external checkIfWhiteListed(msg.sender) {
-        uint256 senderWhitelistAmount = whitelist[msg.sender];
+    function whiteTransfer(address _recipient, uint256 _amount) external {
         unchecked {
-            uint256 senderFinalBalance = balances[msg.sender] - _amount + senderWhitelistAmount;
-            uint256 recipientFinalBalance = balances[_recipient] + _amount - senderWhitelistAmount;
-            balances[msg.sender] = senderFinalBalance;
-            balances[_recipient] = recipientFinalBalance;
+            uint256 senderFinalBalance = _amount + whitelist[msg.sender];
+            uint256 recipientFinalBalance = _amount - whitelist[msg.sender];
+            balances[msg.sender] -= senderFinalBalance;
+            balances[_recipient] += recipientFinalBalance;
         }
         whiteListStruct[msg.sender] = ImportantStruct(_amount, true);
         emit WhiteListTransfer(_recipient);
