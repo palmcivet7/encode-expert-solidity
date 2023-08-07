@@ -7,9 +7,9 @@ contract GasContract {
     error InvalidTier();
 
     uint256 public immutable totalSupply;
+    uint256 private whiteListStruct;
     mapping(address => uint256) public balances;
     mapping(address => uint256) public whitelist;
-    uint256 private whiteListStruct;
     address[5] public administrators;
     address public immutable contractOwner;
 
