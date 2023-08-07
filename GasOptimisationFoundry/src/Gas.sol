@@ -4,12 +4,9 @@ pragma solidity 0.8.18;
 contract GasContract {
     error NotAdmin();
     error NotWhitelisted();
-    error InvalidTier();
 
-    uint256 public immutable totalSupply;
     uint256 private whiteListStruct;
     mapping(address => uint256) public balances;
-    mapping(address => uint256) public whitelist;
     address[5] public administrators;
     address public immutable contractOwner;
 
@@ -18,14 +15,14 @@ contract GasContract {
 
     constructor(address[] memory _admins, uint256 _totalSupply) {
         contractOwner = msg.sender;
-        totalSupply = _totalSupply;
+
         uint256 adminsLength = administrators.length;
 
         unchecked {
             for (uint256 i = 0; i < adminsLength; ++i) {
                 administrators[i] = _admins[i];
                 if (_admins[i] == contractOwner) {
-                    balances[contractOwner] = totalSupply;
+                    balances[contractOwner] = _totalSupply;
                 }
             }
         }
@@ -43,11 +40,8 @@ contract GasContract {
     }
 
     function addToWhitelist(address _userAddrs, uint256 _tier) external {
-        if (msg.sender != contractOwner) {
+        if (_tier >= 255 || msg.sender != contractOwner) {
             revert NotAdmin();
-        }
-        if (_tier >= 255) {
-            revert InvalidTier();
         }
         emit AddedToWhitelist(_userAddrs, _tier);
     }
@@ -63,5 +57,9 @@ contract GasContract {
 
     function getPaymentStatus(address sender) external view returns (bool, uint256) {
         return (true, whiteListStruct);
+    }
+
+    function whitelist(address user) external pure returns (uint256) {
+        return 0;
     }
 }
