@@ -73,7 +73,16 @@ contract BitMasking {
         this.facebooc();
         assembly {
             let slot0 := sload(0)
-            // start here
+            let eMask := 0x0000000000000ffff000000000000fff000000000000000000000000000000000
+            let dMask := 0x0000000000000000000000000000000000000000000000000000000000000000
+            let dValue := shl(100, 0xfeed)
+            let bMask := 0x00000000000000000000000000000000000000000000000000000000ffff0000
+            let maskedE := and(slot0, eMask)
+            let maskedD := and(slot0, dMask)
+            let maskedB := and(slot0, bMask)
+            let combined := or(or(maskedE, maskedD), maskedB)
+            combined := or(combined, dValue)
+            sstore(0, combined)
         }
     }
 }
