@@ -53,7 +53,11 @@ contract BitMasking {
     function facebooc() external {
         assembly {
             let slot0 := sload(0)
-            // start here
+            let mask := 0xffffffffffff00ffffffffffffffffffffffffffffffffffffffffffffff
+            let newValue := or(shl(240, 0xce00), shl(160, 0xfaceb00c))
+            let cleared := and(slot0, mask)
+            let combined := or(cleared, newValue)
+            sstore(0, combined)
         }
     }
 
