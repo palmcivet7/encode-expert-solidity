@@ -7,3 +7,6 @@
 [submodule "GasOptimisationFoundry/lib/forge-std"]
 	path = GasOptimisationFoundry/lib/forge-std
 	url = https://github.com/foundry-rs/forge-std
+[submodule "ExpertSolidityBootcamp/exercises/bitMasking/lib/forge-std"]
+	path = ExpertSolidityBootcamp/exercises/bitMasking/lib/forge-std
+	url = https://github.com/foundry-rs/forge-std
